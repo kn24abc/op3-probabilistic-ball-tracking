@@ -1,0 +1,149 @@
+# Core control-bridge configuration (ball tracker, follower, gamestate hooks).
+# Loaded by op3_control_bridge launch files for both real and sim bringup.
+control_bridge:
+  ros__parameters:
+    ball_tracker:
+      input_topic: "/perception/ball_cam"
+      visibility_topic: "/perception/ball/visible"
+      scan_command_topic: "/robotis/head_control/scan_command"
+      scan_command: "scan"
+      scan_interval: 2.0
+      p_gain: 0.20
+      i_gain: 0.02
+      d_gain: 0.02
+      integral_limit_deg: 30.0
+      min_command_deg: 4.0
+      lost_timeout: 0.7
+      use_scan: true
+      control_rate_hz: 30.0
+      wait_cycles: 15       # was 35 (~0.5s grace, down from ~1.2s)
+      pre_scan_cycles: 30   # was 105 (~1.0s to first scan, down from ~3.5s)
+      particle_hint_timeout_sec: 2.0  # max age of particle filter hint used to bias head scan
+
+    head_control:
+      max_pan_deg: 68.8
+      min_tilt_deg: -40.0
+      max_tilt_deg: 0.5
+      max_upward_tilt_deg: 0.5
+      pan_slew_step_deg: 2.0
+      tilt_slew_step_deg: 2.0
+      goal_peek_tilt_deg: -11.0
+      goal_peek_interval_sec: 2.5
+      goal_peek_slow_scale: 0.6
+      goal_peek_slow_duration_sec: 0.6
+      recentre_turn_min_deg: 6.0
+      recentre_blend: 0.35
+
+    gameplay:
+      role: "attacker"
+
+    action:
+      page_retry_count: 2
+      page_retry_interval_sec: 0.05
+      page_timeout_sec: 4.0
+
+    head_scan:
+      head_offset_topic: "/robotis/head_control/set_joint_states_offset"
+      command_period_sec: 1.0
+      max_pan_deg: 55.0
+      pan_step_deg: 15.0
+      tilt_step_deg: 2.0
+      sweep_step_deg: 2.0
+      max_tilt_deg: 5.0
+      max_upward_tilt_deg: 5.0
+      min_tilt_deg: -35.0          # was -1.0 – now covers ground-level ball
+      default_search_tilt_deg: 2.0
+      layers: 4
+      repeat: false
+      # 0 -> use all grid cells (pan_cells * tilt_cells) once in random order
+      random_target_count: 6      # was 4
+      pan_cells: 5                # was 3 – finer horizontal coverage
+      tilt_cells: 4               # was 2 – gives 4 vertical layers (-35, -22, -9, +5 deg)
+
+    ball_walking:
+      nominal_forward_step: 0.015
+      max_forward_step: 0.03
+      min_forward_step: 0.006
+      max_turn_deg: 12.0
+      stop_timeout_sec: 1.0
+
+    auto_kick:
+      enabled: true
+      goal_tolerance_deg: 15.0
+      cooldown_sec: 3.0
+      require_goal_detection: false
+
+    ball_follower:
+      body_input_topic: "/perception/ball"
+      camera_input_topic: "/perception/ball_cam"
+      body_yaw_weight: 0.5
+      ball_equipped_bbox_min_area: 18000.0
+      ball_equipped_max_abs_bearing: 0.20
+      ball_equipped_hold_timeout_sec: 0.8
+      ball_equipped_topic: "/control_bridge/ball_equipped"
+
+    ball_dribbler:
+      input_topic: "/perception/ball"
+      lock_bbox_min_area: 12000.0
+      close_bbox_area: 3200.0
+      lock_max_abs_bearing: 0.12
+      goal_alignment_weight: 1.0
+      goal_alignment_deadband_deg: 5.0
+      goal_alignment_timeout_sec: 1.5
+
+    ball_searcher:
+      search_forward_step: 0.001
+      search_turn_deg: 28.0
+      command_period_sec: 0.7
+      turn_hold_cycles: 200
+      alternate_turn: true
+      enter_delay_sec: 1.5
+      scan_request_period_sec: 2.0
+
+    goal_tracker:
+      detection_topic: "/perception/goalpost"
+      horizontal_fov_deg: 35.2
+      detection_timeout_sec: 1.5
+      field_length_m: 14.0
+      field_width_m: 9.0
+      goal_width_m: 6.0
+      attack_positive_x: true
+
+    ball_kicker:
+      enable_topic: "/control_bridge/ball_kick_enable"
+      ball_topic: "/perception/ball"
+      detection_timeout_sec: 1.5
+      max_ball_offset_deg: 40.0
+      default_page: 120
+      left_page: 120
+      right_page: 121
+      use_grass_offset: true
+
+    gamestate:
+      topic: "/gamestate"
+      init_pose_page: 80
+      walk_ready_page: 9
+
+    joint_map:
+      id_joint:
+        1: r_sho_pitch
+        2: l_sho_pitch
+        3: r_sho_roll
+        4: l_sho_roll
+        5: r_el
+        6: l_el
+        7: r_hip_yaw
+        8: l_hip_yaw
+        9: r_hip_roll
+        10: l_hip_roll
+        11: r_hip_pitch
+        12: l_hip_pitch
+        13: r_knee
+        14: l_knee
+        15: r_ank_pitch
+        16: l_ank_pitch
+        17: r_ank_roll
+        18: l_ank_roll
+        19: head_pan
+        20: head_tilt
+        200: opencr
