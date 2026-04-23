@@ -1,0 +1,9 @@
+/**:
+  ros__parameters:
+    network:
+      config: "$(find-pkg-share op3_vision_darknet)/config/bh-network/bh-v10.cfg"
+      weights: "$(find-pkg-share op3_vision_darknet)/config/bh-network/bh-v10-custom_last.weights"
+      class_names: "$(find-pkg-share op3_vision_darknet)/config/bh-network/class.names"
+    detection:
+      threshold: 0.5
+      nms_threshold: 0.45
