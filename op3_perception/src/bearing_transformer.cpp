@@ -52,9 +52,10 @@ BearingTransformer::BearingTransformer(
   enabled_ = !target_frame_.empty();
   if (!enabled_)
   {
-    RCLCPP_INFO(
+    RCLCPP_ERROR(
         logger_,
-        "Bearing transform disabled (%s parameter empty).",
+        "BearingTransformer: '%s' is empty — body-frame transform DISABLED. "
+        "/perception/ball will NOT publish.",
         target_key.c_str());
   }
 }
@@ -116,7 +117,15 @@ bool BearingTransformer::transform(op3_vision_msgs::msg::Detection & detection)
       yaw_cam, pitch_cam);
 
   if (!enabled_ || !tf_buffer_)
+  {
+    if (clock_)
+    {
+      RCLCPP_WARN_THROTTLE(logger_, *clock_, 5000,
+          "BearingTransformer::transform skipped — transformer is disabled "
+          "(target_frame empty). Check bearing_transform.target_frame param.");
+    }
     return false;
+  }
   if (detection.header.frame_id.empty())
     return false;
 
