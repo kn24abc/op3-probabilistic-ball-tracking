@@ -806,10 +806,16 @@ public:
   std::unordered_map<std::string, int> joint_id_table_;
 
   // joint lists
-  // Head joints only — all arm joints go to walking_module so the walking
-  // controller holds them at its own neutral (arm_swing_gain=0 keeps them still).
+  // Arm joints stay in action_module so they hold the walk-ready pose set by
+  // page 9 at t=11.5s. Walking module must not override them or it resets
+  // sho_roll/elbow to its own defaults which causes T-pose spreading.
   const std::vector<std::string> head_joints_ = {"head_pan", "head_tilt"};
-  std::vector<std::string> non_walking_joints_ = {"head_pan", "head_tilt"};
+  std::vector<std::string> non_walking_joints_ = {
+    "head_pan",    "head_tilt",
+    "r_sho_pitch", "l_sho_pitch",
+    "r_sho_roll",  "l_sho_roll",
+    "r_el",        "l_el"
+  };
   std::vector<std::string> walking_joints_;
   std::vector<std::string> all_joints_;
 
