@@ -221,9 +221,14 @@ private:
       mean_y += p.w * p.y;
     }
 
+    // If the weighted mean is behind the robot (mean_x <= 0), the filter has
+    // lost confidence — particles drifted past the robot. Default to straight
+    // ahead so the head scan starts from centre rather than spinning to ±180°.
+    const double pan = (mean_x > 0.1) ? std::atan2(mean_y, mean_x) : 0.0;
+
     geometry_msgs::msg::Point msg;
-    msg.x = std::atan2(mean_y, mean_x);  // pan  (radians)
-    msg.y = search_tilt_;                 // tilt (radians, fixed downward)
+    msg.x = pan;          // pan  (radians)
+    msg.y = search_tilt_; // tilt (radians, fixed downward)
     msg.z = 0.0;
     bearing_pub_->publish(msg);
     RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000,
