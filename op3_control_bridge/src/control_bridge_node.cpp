@@ -806,15 +806,10 @@ public:
   std::unordered_map<std::string, int> joint_id_table_;
 
   // joint lists
-  // All arm joints stay in action_module (walk-ready pose); walking module must
-  // not override shoulder pitch/roll or elbows or arms splay outward.
+  // Head joints only — all arm joints go to walking_module so the walking
+  // controller holds them at its own neutral (arm_swing_gain=0 keeps them still).
   const std::vector<std::string> head_joints_ = {"head_pan", "head_tilt"};
-  std::vector<std::string> non_walking_joints_ = {
-    "head_pan",     "head_tilt",
-    "r_sho_pitch",  "l_sho_pitch",
-    "r_sho_roll",   "l_sho_roll",
-    "r_el",         "l_el"
-  };
+  std::vector<std::string> non_walking_joints_ = {"head_pan", "head_tilt"};
   std::vector<std::string> walking_joints_;
   std::vector<std::string> all_joints_;
 
@@ -1093,7 +1088,7 @@ bool ControlBridge::loadJointTablesFromYAML(const std::string& path) {
 
       param_msg.y_swap_amplitude = 0.028;
       param_msg.z_swap_amplitude = 0.006;
-      param_msg.arm_swing_gain = 0.20;
+      param_msg.arm_swing_gain = 0.0;
       param_msg.pelvis_offset = 0.0;
 
       param_msg.p_gain = 0;
@@ -1508,7 +1503,7 @@ void ControlBridge::publishWalkingParams(double fb_move, double rl_turn)
   param.z_move_amplitude = 0.06;
   param.y_swap_amplitude = 0.028;
   param.z_swap_amplitude = 0.006;
-  param.arm_swing_gain = 0.20;
+  param.arm_swing_gain = 0.0;
   param.pelvis_offset = 0.0;
   param.balance_enable = true;
   param.balance_hip_roll_gain = 0.30;
