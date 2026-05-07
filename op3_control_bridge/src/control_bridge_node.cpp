@@ -2150,7 +2150,10 @@ void ControlBridge::setBallDribble(bool enable)
   }
 
   if (enable)
+  {
+    setHeadTracking(true);
     requireWalkingControl();
+  }
 
   ball_dribbler_->enable(enable);
 }
