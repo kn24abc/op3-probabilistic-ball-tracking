@@ -806,9 +806,15 @@ public:
   std::unordered_map<std::string, int> joint_id_table_;
 
   // joint lists
-  // when not using arms don't switch {'walking_module': r_sho_roll l_sho_roll r_el l_el head_pan head_tilt}
+  // All arm joints stay in action_module (walk-ready pose); walking module must
+  // not override shoulder pitch/roll or elbows or arms splay outward.
   const std::vector<std::string> head_joints_ = {"head_pan", "head_tilt"};
-  std::vector<std::string> non_walking_joints_ = {"head_pan", "head_tilt", "r_sho_roll", "l_sho_roll", "r_el", "l_el"};
+  std::vector<std::string> non_walking_joints_ = {
+    "head_pan",     "head_tilt",
+    "r_sho_pitch",  "l_sho_pitch",
+    "r_sho_roll",   "l_sho_roll",
+    "r_el",         "l_el"
+  };
   std::vector<std::string> walking_joints_;
   std::vector<std::string> all_joints_;
 
@@ -2279,6 +2285,9 @@ void ControlBridge::setBallSearch(bool enable)
     ball_search_active_ = true;
     setBallFollowing(false);
     setBallDribble(false);
+    // Re-enable the tracker so visibility_cb fires when the ball is spotted,
+    // which calls setBallSearch(false) and ends the search.
+    setHeadTracking(true);
     requireWalkingControl();
     publishHeadScan("scan");
   }
