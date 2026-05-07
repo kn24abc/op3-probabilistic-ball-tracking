@@ -1504,6 +1504,10 @@ void ControlBridge::publishWalkingParams(double fb_move, double rl_turn)
   param.arm_swing_gain = 0.20;
   param.pelvis_offset = 0.0;
   param.balance_enable = true;
+  param.balance_hip_roll_gain = 0.30;
+  param.balance_knee_gain = 0.30;
+  param.balance_ankle_roll_gain = 0.60;
+  param.balance_ankle_pitch_gain = 0.70;
   param.x_move_amplitude = fb_move;
   param.y_move_amplitude = 0.0;
   param.angle_move_amplitude = rl_turn;
