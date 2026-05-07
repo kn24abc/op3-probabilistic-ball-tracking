@@ -22,6 +22,13 @@ def generate_launch_description() -> LaunchDescription:
                 executable='ball_particle_filter_node',
                 name='ball_particle_filter_node',
                 output='screen',
+                parameters=[{
+                    # Only apply range likelihood when head is >20 deg down
+                    # (ball estimated at <=1.5 m) — avoids collapsing on far balls.
+                    'min_tilt_for_range_rad': 0.35,
+                    # Looser range sigma so far-ball geometry errors don't kill weights.
+                    'sigma_range_m': 1.0,
+                }],
             ),
         ]
     )
