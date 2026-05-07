@@ -104,7 +104,7 @@ static FallDirection getFallDirection(const sensor_msgs::msg::Imu& imu)
   const double roll_deg  = rpy_orientation.coeff(0, 0) * (180.0 / M_PI);
   const double pitch_deg = rpy_orientation.coeff(1, 0) * (180.0 / M_PI);
 
-  constexpr double kFallLimitDeg = 45.0;
+  constexpr double kFallLimitDeg = 55.0;
 
   if(pitch_deg > kFallLimitDeg)
   {
@@ -833,9 +833,10 @@ public:
   // fall detection and recovery
   // flag variables currently not implemented
   bool recovering_{false};           // true while a get-up action is in progress
-  bool pending_recovery_{false};     // fall detected, set if an action running when fall detected 
-  
+  bool pending_recovery_{false};     // fall detected, set if an action running when fall detected
+
   FallDirection fall_direction_{FallDirection::None}; // enum Forward, Backward, None
+  int fall_detect_count_{0};         // consecutive IMU frames above threshold (debounce)
   
   // imu topic and data
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
@@ -1321,8 +1322,16 @@ void ControlBridge::onImuMsg(const sensor_msgs::msg::Imu::SharedPtr msg)
   fall_direction_ = getFallDirection(imu_data_);
   if (fall_direction_ != FallDirection::None)
   {
-    RCLCPP_DEBUG(get_logger(), "Calling triggerRecovery(%s)", to_string(fall_direction_));
-    triggerRecovery(fall_direction_);
+    fall_detect_count_++;
+    if (fall_detect_count_ >= 3)
+    {
+      RCLCPP_DEBUG(get_logger(), "Calling triggerRecovery(%s)", to_string(fall_direction_));
+      triggerRecovery(fall_direction_);
+    }
+  }
+  else
+  {
+    fall_detect_count_ = 0;
   }
 
   if (goal_tracker_)
@@ -1350,8 +1359,9 @@ void ControlBridge::publishRecovery(const std_msgs::msg::Int32 &msg, FallDirecti
   recovering_ = true;
   pending_recovery_ = false;
   pending_recovery_direction_ = FallDirection::None;
-  // Use the retry-enabled path so the page is re-sent after the module switch completes.
-  publishActionPageMessage(msg.data);
+  // publishActionPage queues the page until the module switch completes,
+  // without triggering the runaway republish timer.
+  publishActionPage(msg.data);
 }
 
 void ControlBridge::publishHeadOffset(double pan, double tilt)
