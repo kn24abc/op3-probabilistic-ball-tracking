@@ -12,7 +12,10 @@ def generate_launch_description() -> LaunchDescription:
                 executable="goalpost_filter_node",
                 name="goalpost_filter",
                 output="screen",
-                parameters=[{}],
+                parameters=[{
+                    'bearing_transform.target_frame': 'body_link',
+                    'camera_frame': 'cam_link',
+                }],
             )
         ]
     )
