@@ -293,11 +293,11 @@ private:
     }
 
     if (best != nullptr) {
-      // bearing.x is a fraction of hFOV (-0.5 … +0.5) → convert to radians
+      // Ball is visible — update filter state but stay silent.
+      // The PID head tracker handles the head while the ball is in view;
+      // the hint topic is only for when the ball is lost.
       const double meas_pan = static_cast<double>(best->bearing.x) * hfov_rad_;
 
-      // bearing.y is a fraction of vFOV (-0.5 … +0.5); positive = above optical axis
-      // Combine with head joint tilt to get absolute camera elevation in body frame
       double abs_tilt_rad = 0.0;
       if (have_head_tilt_) {
         const double tilt_in_cam_rad = static_cast<double>(best->bearing.y) * vfov_rad_;
@@ -305,9 +305,11 @@ private:
       }
 
       update(meas_pan, abs_tilt_rad);
+    } else {
+      // Ball not visible — publish best-guess bearing so the head scan
+      // starts at the predicted location instead of a random cell.
+      publishSearchBearing();
     }
-
-    publishSearchBearing();
   }
 
   // Parameters
