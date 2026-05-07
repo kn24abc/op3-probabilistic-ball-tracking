@@ -193,13 +193,14 @@ std::vector<HeadScan::Target> HeadScan::planTargets(double pan_hint, double tilt
     return planned;
   }
 
-  // Sort candidates by distance to the hint so the scan starts near the
-  // particle filter's predicted ball location.
+  // Sort tilt descending (highest tilt first = natural standing gaze → ground).
+  // Within each tilt layer, sort pan by proximity to the hint so the scan
+  // starts on the side where the particle filter predicts the ball.
   auto bag = candidate_targets_;
-  std::sort(bag.begin(), bag.end(), [pan_hint, tilt_hint](const Target &a, const Target &b) {
-    const double da = std::hypot(a.first - pan_hint, a.second - tilt_hint);
-    const double db = std::hypot(b.first - pan_hint, b.second - tilt_hint);
-    return da < db;
+  std::sort(bag.begin(), bag.end(), [pan_hint](const Target &a, const Target &b) {
+    if (std::fabs(a.second - b.second) > 1e-4)
+      return a.second > b.second;  // higher tilt first
+    return std::fabs(a.first - pan_hint) < std::fabs(b.first - pan_hint);
   });
 
   // If random_target_count <= 0, use all cells; otherwise cap to that many
