@@ -104,7 +104,7 @@ static FallDirection getFallDirection(const sensor_msgs::msg::Imu& imu)
   const double roll_deg  = rpy_orientation.coeff(0, 0) * (180.0 / M_PI);
   const double pitch_deg = rpy_orientation.coeff(1, 0) * (180.0 / M_PI);
 
-  constexpr double kFallLimitDeg = 60.0;
+  constexpr double kFallLimitDeg = 45.0;
 
   if(pitch_deg > kFallLimitDeg)
   {
@@ -1079,15 +1079,15 @@ bool ControlBridge::loadJointTablesFromYAML(const std::string& path) {
       param_msg.hip_pitch_offset = 5.0 * DEG_TO_RAD;
 
       param_msg.period_time = 0.650;
-      param_msg.dsp_ratio = 0.20;
+      param_msg.dsp_ratio = 0.25;
       param_msg.step_fb_ratio = 0.28;
 
       param_msg.move_aim_on = false;
       param_msg.balance_enable = true;
-      param_msg.balance_hip_roll_gain = 0.35;
+      param_msg.balance_hip_roll_gain = 0.30;
       param_msg.balance_knee_gain = 0.30;
-      param_msg.balance_ankle_roll_gain = 0.70;
-      param_msg.balance_ankle_pitch_gain = 0.90;
+      param_msg.balance_ankle_roll_gain = 0.60;
+      param_msg.balance_ankle_pitch_gain = 0.70;
 
       param_msg.y_swap_amplitude = 0.028;
       param_msg.z_swap_amplitude = 0.006;
@@ -1347,14 +1347,11 @@ void ControlBridge::onImuMsg(const sensor_msgs::msg::Imu::SharedPtr msg)
 void ControlBridge::publishRecovery(const std_msgs::msg::Int32 &msg, FallDirection fall_direction_)
 {
   (void)fall_direction_;
-  requireActionControl();
-  action_page_num_pub_->publish(msg);
   recovering_ = true;
   pending_recovery_ = false;
   pending_recovery_direction_ = FallDirection::None;
-  // RCLCPP_DEBUG(get_logger(),
-  //             "Triggering recovery action %d (%s)",
-  //             msg.data, to_string(fall_direction_));
+  // Use the retry-enabled path so the page is re-sent after the module switch completes.
+  publishActionPageMessage(msg.data);
 }
 
 void ControlBridge::publishHeadOffset(double pan, double tilt)
@@ -1494,7 +1491,7 @@ void ControlBridge::publishWalkingParams(double fb_move, double rl_turn)
   param.init_yaw_offset = 0.0;
   param.hip_pitch_offset = 5.0 * DEG2RAD;
   param.period_time = 0.650;
-  param.dsp_ratio = 0.20;
+  param.dsp_ratio = 0.25;
   param.step_fb_ratio = 0.28;
   param.z_move_amplitude = 0.06;
   param.y_swap_amplitude = 0.028;
