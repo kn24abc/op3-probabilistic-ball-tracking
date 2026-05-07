@@ -1440,7 +1440,8 @@ void ControlBridge::publishHeadScan(const std::string &cmd)
   const double pan_hint  = hint_fresh ? particle_pan_hint_  : head_scan_->getConfig().start_pan_rad;
   const double tilt_hint = hint_fresh ? particle_tilt_hint_ : head_scan_->getConfig().start_tilt_rad;
   if (hint_fresh)
-    RCLCPP_INFO(get_logger(), "Head scan using particle hint: pan=%.1f° tilt=%.1f°",
+    RCLCPP_INFO(get_logger(),
+                "\033[33m[ParticleHint] Head scan biased by particle filter → pan=%.1f° tilt=%.1f°\033[0m",
                 pan_hint * 180.0 / M_PI, tilt_hint * 180.0 / M_PI);
 
   auto clamp_with_margin = [](double value, double min_lim, double max_lim, double margin) {

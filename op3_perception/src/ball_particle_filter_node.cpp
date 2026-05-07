@@ -226,6 +226,9 @@ private:
     msg.y = search_tilt_;                 // tilt (radians, fixed downward)
     msg.z = 0.0;
     bearing_pub_->publish(msg);
+    RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000,
+        "\033[33m[ParticleFilter] Bearing hint published → pan=%.1f° tilt=%.1f°\033[0m",
+        msg.x * 180.0 / M_PI, msg.y * 180.0 / M_PI);
   }
 
   // ---------------------------------------------------------------------------
