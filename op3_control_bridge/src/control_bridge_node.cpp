@@ -329,15 +329,10 @@ public:
       return head_scan_ && head_scan_->isActive();
     };
     tracker_config.state_change_cb = [this](TrackingState state) {
-      if (state == TrackingState::Lost)
-      {
-        if (cmd_action_pub_)
-        {
-          std_msgs::msg::Int32 msg;
-          msg.data = 9;  // walk-ready / stand
-          cmd_action_pub_->publish(msg);
-        }
-      }
+      (void)state;
+      // No action-page trigger on ball lost: the follower stops walking on its
+      // own and the tracker starts a head scan. Playing page 9 here switches
+      // all joints to action_module and leaves them there permanently.
     };
 
     ball_tracker_ = std::make_unique<BallTracker>(this, tracker_config);
@@ -1955,6 +1950,13 @@ void ControlBridge::checkHeadTrackingResume()
           {
             head_tracking_resume_timer_->cancel();
             head_tracking_resume_timer_.reset();
+          }
+          // Restore walking and ball-follow after kicks (not during fall recovery
+          // — the recovery watcher handles that path with its own resume flags).
+          if (!recovering_ && ball_follow_requested_)
+          {
+            requireWalkingControl();
+            setBallFollowing(true);
           }
           evaluateBehaviorState();
         }
