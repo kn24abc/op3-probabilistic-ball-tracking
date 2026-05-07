@@ -719,7 +719,7 @@ public:
     //             "GameState listener active on %s",
     //             gamestate_topic.c_str());
 
-    // RCLCPP_INFO(this->get_logger(), "control_bridge node has started.");
+    RCLCPP_INFO(this->get_logger(), "ControlBridge initialised");
 
   }
 
@@ -945,6 +945,7 @@ public:
   void onBallSearchEnable(const std_msgs::msg::Bool::SharedPtr msg);
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr ball_search_sub_;
   bool ball_search_active_{false};
+  bool ball_follow_requested_{false};
   bool resume_head_tracking_{false};
   bool resume_ball_following_{false};
   bool resume_ball_dribble_{false};
@@ -2103,6 +2104,7 @@ void ControlBridge::setBallFollowing(bool enable)
 
 void ControlBridge::onBallFollowEnable(const std_msgs::msg::Bool::SharedPtr msg)
 {
+  ball_follow_requested_ = msg->data;
   setBallFollowing(msg->data);
 }
 
@@ -2263,6 +2265,8 @@ void ControlBridge::setBallSearch(bool enable)
   {
     ball_search_active_ = false;
     publishHeadScan("stop");
+    if (ball_follow_requested_)
+      setBallFollowing(true);
   }
 
   ball_searcher_->enable(enable);

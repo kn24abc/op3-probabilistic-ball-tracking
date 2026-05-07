@@ -8,11 +8,11 @@ control_bridge:
       scan_command_topic: "/robotis/head_control/scan_command"
       scan_command: "scan"
       scan_interval: 2.0
-      p_gain: 0.20
+      p_gain: 0.40
       i_gain: 0.02
       d_gain: 0.02
       integral_limit_deg: 30.0
-      min_command_deg: 4.0
+      min_command_deg: 2.0
       lost_timeout: 0.7
       use_scan: true
       control_rate_hz: 30.0
@@ -56,7 +56,7 @@ control_bridge:
       layers: 4
       repeat: false
       # 0 -> use all grid cells (pan_cells * tilt_cells) once in random order
-      random_target_count: 6      # was 4
+      random_target_count: 0      # 0 = all 20 cells every cycle; hint sort still applies
       pan_cells: 5                # was 3 – finer horizontal coverage
       tilt_cells: 4               # was 2 – gives 4 vertical layers (-35, -22, -9, +5 deg)
 
@@ -95,7 +95,7 @@ control_bridge:
       search_forward_step: 0.001
       search_turn_deg: 28.0
       command_period_sec: 0.7
-      turn_hold_cycles: 200
+      turn_hold_cycles: 6
       alternate_turn: true
       enter_delay_sec: 1.5
       scan_request_period_sec: 2.0
