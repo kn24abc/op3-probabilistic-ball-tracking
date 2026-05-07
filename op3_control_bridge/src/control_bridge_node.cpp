@@ -2101,10 +2101,14 @@ void ControlBridge::setBallFollowing(bool enable)
 
   if (enable)
   {
+    setHeadTracking(true);
     requireWalkingControl();
   }
   else
+  {
+    setHeadTracking(false);
     publishWalkingCommand(false);
+  }
 
   ball_follower_->enable(enable);
 }
